@@ -16,9 +16,9 @@ def increase_brightness(img, value=30):
 
 def line(image, hw, value, color = (0,255,0)):
     if hw == "X=":
-        for i in range(0, image.shape[0]):
+        for i in range(0, image.shape[0] - 4):
             image[i][value] = color
     elif hw == "Y=":
-        for i in range(0, image.shape[1]):
+        for i in range(0, image.shape[1] - 4):
             image[value][i] = color
     return image
