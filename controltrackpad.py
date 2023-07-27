@@ -1,6 +1,17 @@
 import cv2
 import helpers
 import numpy as np
+import remote
+import pickle
+
+
+remote.setupParameters()
+try:
+    remote.init_connection(input("IP address of the remote turret? "))
+except Exception as e:
+    print(f"Failed to establish a connection to the remote: {e}")
+
+
 
 aimcontrol = np.zeros((300,300,3), np.uint8)
 fullwindow = np.zeros((700,1000,3), np.uint8)
@@ -89,6 +100,7 @@ def onClick(event, x, y, f, p, override = False):
 
     UIupdate()
 
+
     
     if ( 0 <= x <= 300 and 0 <= y <= 300):
         global unlockControls, aimcontrol, pitch, yaw
@@ -98,6 +110,7 @@ def onClick(event, x, y, f, p, override = False):
             aimcontrol = helpers.line(aimcontrol, "Y=", y, (255,0,255))
             pitch = -1 * (int((y/300) * 180) - 90)
             yaw   = +1 * (int((x/300) * 180) - 90)
+            remote.sendTo("TCP", remote.TCP_CONNECTION, f"absyaw {yaw};abspitch {pitch};")
         if event == cv2.EVENT_LBUTTONDOWN:
             unlockControls = not unlockControls
 
@@ -115,6 +128,18 @@ def onClick(event, x, y, f, p, override = False):
             (255,255,255)
         )
 
+    updateVideoFeed()
+
+
+def updateVideoFeed():
+    global fullwindow
+    r = remote.readFrom("UDP", remote.UDP_SOCKET, 65534)
+    if r:
+        frame = pickle.loads(r)
+        frame = cv2.resize(frame, (480,360))
+        fullwindow[320:320+360,0:0+480] = frame
+
+
 aimControlUpdate()
 UIupdate()
 cv2.namedWindow("manualcontroltrackpad")
@@ -122,6 +147,8 @@ cv2.setMouseCallback('manualcontroltrackpad', onClick)
 
 print("UI initialized!")
 while True:
+
+    updateVideoFeed() 
     fullwindow[0:300,0:300] = aimcontrol
     cv2.imshow("manualcontroltrackpad", fullwindow)
     cv2.waitKey(1)
