@@ -33,7 +33,7 @@ text = [
     ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
     ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
     ["<- ManualCtrl", (255,255,255), 0.8, (350,260)],
-    ["cv2-based UI engine demo: github.com/yearbook-milk/usgnerfwars-remotecontroller", (255,255,255), 0.5, (10,690)]   
+    ["cv2-based UI engine demo: github.com/yearbook-milk/usgnerfwars-remotecontroller", (255,255,255), 0.5, (10,620)]   
 
 ]
 
@@ -104,6 +104,16 @@ def onClick(event, x, y, f, p, override = False):
         #cv2.putText(aimcontrol, f"client: {pitch}deg pitch, {yaw}deg yaw", (30,270), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255))
         #cv2.putText(aimcontrol, f"controls unlocked: {unlockControls}", (30,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255))
         print(f"Pitch/yaw command sent: {pitch}deg pitch, {yaw}deg yaw")
+
+
+    cv2.putText(
+            fullwindow,
+            f"X:{x} Y:{y} evt:{event} flag:{f} param:{p}",
+            (10,690),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (255,255,255)
+        )
 
 aimControlUpdate()
 UIupdate()
