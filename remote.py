@@ -9,15 +9,17 @@ TCP_CONNECTION = None
 UDP_SOCKET = None
 TCP_REMOTE_PEER = None
 
-def sendTo(protocol, sock, message):
-    global TCP_REMOTE_PEER
-    assert protocol == "TCP"
-    try:
-        sock.sendall(bytes(message, "ascii"))
+def sendTo(protocol, sock, message, destiny = None):
+     try:
+        if protocol == "TCP":
+            sock.sendall(message)
+        else:
+            assert destiny != None
+            sock.sendto(message, (destiny, data_channel_port))
         return None
-    except (ConnectionResetError, OSError, BrokenPipeError):
-        print("Cx Error! Attempting a reconnect...")
-        init_connection(TCP_REMOTE_PEER[0])
+    except (ConnectionResetError, OSError, BrokenPipeError) as e:
+        print(f"[net] Cx Error {e}! Attempting a reconnect...")
+        #initConnection()
 
 def readFrom(protocol, sock, bufSize = 1024):
     global TCP_REMOTE_PEER
