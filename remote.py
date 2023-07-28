@@ -51,7 +51,6 @@ def setupParameters(tcpport = 10007, udpport = 10009):
     # any sense for the user to be able to set this number when it will be overwritten later
 
 def init_connection(addr):
-    time.sleep(5)
     global TCP_SOCKET, UDP_SOCKET, udp_port, signaling_port, TCP_REMOTE_PEER
     print("Waiting to connect again...")
     if TCP_SOCKET:

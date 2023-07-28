@@ -17,7 +17,7 @@ except Exception as e:
 
 
 aimcontrol = np.zeros((300,300,3), np.uint8)
-fullwindow = np.zeros((700,1000,3), np.uint8)
+fullwindow = np.zeros((800,1000,3), np.uint8)
 unlockControls = True
 pitch = 0
 yaw = 0
@@ -130,9 +130,19 @@ def updateVideoFeed():
     global fullwindow
     r = remote.readFrom("UDP", remote.UDP_SOCKET, 65534)
     if r:
-        frame = pickle.loads(r)
-        frame = cv2.resize(frame, (480,360))
-        fullwindow[320:320+360,0:0+480] = frame
+        try:
+            parts = r.split(b"::::")
+            frame = pickle.loads(parts[0])
+            parts[2] = pickle.loads(parts[2])
+            frame = cv2.resize(frame, (parts[2][1], parts[2][0]))
+            
+            encoded_txt = pickle.loads(parts[1])
+            for i in encoded_txt:
+                frame = cv2.putText(frame, i[4], (i[0], i[1]), cv2.FONT_HERSHEY_SIMPLEX, i[3], i[2])
+
+            fullwindow[320:320+frame.shape[0],0:0+frame.shape[1]] = frame
+        except Exception as e:
+            print(f"Decode error! An error occurred when trying to decode the video data received: {e}")
 
 
 aimControlUpdate()
