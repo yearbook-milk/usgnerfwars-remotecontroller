@@ -7,16 +7,24 @@ import os
 
 ip = None
 port = None
-
 remote.setupParameters()
-if ip == None or port == None:   
-    try:
-        ip = input("IP address of the remote turret? ")
-        port = int(input("TCP port number? "))
-        remote.setupParameters(tcpport = port, udpport = 0)
-        remote.init_connection(ip)
-    except Exception as e:
-        print(f"Failed to establish a connection to the remote: {e}")
+
+decision = input("Start in [r]emote mode or [l]ocal control/test mode? ")
+
+if decision == "r":
+    if ip == None or port == None:   
+        try:
+            ip = input("IP address of the remote turret? ")
+            port = int(input("TCP port number? "))
+            remote.setupParameters(tcpport = port, udpport = 0)
+            remote.init_connection(ip)
+        except Exception as e:
+            print(f"Failed to establish a connection to the remote: {e}")
+elif decision == 'l':
+    import servo_relay_interface as sri
+    pass
+else:
+    exit()
 
 
 
@@ -26,38 +34,54 @@ unlockControls = True
 pitch = 0
 yaw = 0
 
-buttons = [
-    ["Rev", (0,150,255), lambda: print("Rev command sent.."), (540,50)],
-    ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
-    
-    ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
-    ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
-    ["Reinit Pipeln", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (790,120)],
-    
-    ["Graceful D/C", (0,0,255), lambda: issueCommandTCP("stop"), (800,270)],
-    ["Restart", (0,255,255), lambda: issueCommandTCP("restart"), (800,330)],
+
+if decision == "r":
+    buttons = [
+        ["Rev", (0,150,255), lambda: print("Rev command sent.."), (540,50)],
+        ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
+        
+        ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
+        ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
+        ["Reinit Pipeln", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (790,120)],
+        
+        ["Graceful D/C", (0,0,255), lambda: issueCommandTCP("stop"), (800,270)],
+        ["Restart", (0,255,255), lambda: issueCommandTCP("restart"), (800,330)],
 
 
-    ["0", (0,255,255), lambda: issueCommandTCP("select 0"), (540,190)],
-    ["1", (0,255,255), lambda: issueCommandTCP("select 1"), (540+(35 * 1),190)],
-    ["2", (0,255,255), lambda: issueCommandTCP("select 2"), (540+(35 * 2),190)],
-    ["3", (0,255,255), lambda: issueCommandTCP("select 3"), (540+(35 * 3),190)],
-    ["4", (0,255,255), lambda: issueCommandTCP("select 4"), (540+(35 * 4),190)],
-    ["5", (0,255,255), lambda: issueCommandTCP("select 5"), (540+(35 * 5),190)],
-    ["6", (0,255,255), lambda: issueCommandTCP("select 6"), (540+(35 * 6),190)],
-    ["7", (0,255,255), lambda: issueCommandTCP("select 7"), (540+(35 * 7),190)],
-    ["8", (0,255,255), lambda: issueCommandTCP("select 8"), (540+(35 * 8),190)],
-    ["9", (0,255,255), lambda: issueCommandTCP("select 9"), (540+(35 * 9),190)],
+        ["0", (0,255,255), lambda: issueCommandTCP("select 0"), (540,190)],
+        ["1", (0,255,255), lambda: issueCommandTCP("select 1"), (540+(35 * 1),190)],
+        ["2", (0,255,255), lambda: issueCommandTCP("select 2"), (540+(35 * 2),190)],
+        ["3", (0,255,255), lambda: issueCommandTCP("select 3"), (540+(35 * 3),190)],
+        ["4", (0,255,255), lambda: issueCommandTCP("select 4"), (540+(35 * 4),190)],
+        ["5", (0,255,255), lambda: issueCommandTCP("select 5"), (540+(35 * 5),190)],
+        ["6", (0,255,255), lambda: issueCommandTCP("select 6"), (540+(35 * 6),190)],
+        ["7", (0,255,255), lambda: issueCommandTCP("select 7"), (540+(35 * 7),190)],
+        ["8", (0,255,255), lambda: issueCommandTCP("select 8"), (540+(35 * 8),190)],
+        ["9", (0,255,255), lambda: issueCommandTCP("select 9"), (540+(35 * 9),190)],
 
-    
-]
+        
+    ]
+else:
+    buttons = [
+        ["Rev", (0,150,255), lambda: print("Local Rev command sent.."), (540,50)],
+        ["Fire", (0,0,255), lambda: print("Local Fire command sent.."), (620,50)],
+        ["Quit", (0,0,255), lambda: exit(), (800,570)],
+    ]
 
-text = [
-    ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
-    ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
-    ["<- ManualCtrl     Networking ->", (255,255,255), 0.8, (350,260)],
-    ["cv2-based GUI Rendering Engine", (255,255,255), 0.4, (10,690)]
-]
+if decision == "r":
+    text = [
+        ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
+        ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
+        ["<- ManualCtrl     Networking ->", (255,255,255), 0.8, (350,260)],
+        ["cv2-based GUI Rendering Engine", (255,255,255), 0.4, (10,690)]
+    ]
+else:
+    text = [
+        ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
+        ["AutoCtrl [is disabled]", (255,255,255), 0.8, (350,120)],
+        ["<- ManualCtrl     Networking [is disabled]", (255,255,255), 0.8, (350,260)],
+        ["cv2-based GUI Rendering Engine  :  LOCAL CONTROL ONLY", (255,255,255), 0.4, (10,690)]
+    ]
 
 def UIupdate():
     global fullwindow
@@ -126,7 +150,11 @@ def onClick(event, x, y, f, p, override = False):
             pitch = -1 * (int((y/300) * 180) - 90)
             yaw   = +1 * (int((x/300) * 180) - 90)
             # with UDP backwash enabled, we can do this so we can just fire and forget
-            remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
+            if decision == "r": remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
+            else:
+                sri.pitch(pitch)
+                sri.yaw(yaw)
+                pass
         if event == cv2.EVENT_LBUTTONDOWN:
             unlockControls = not unlockControls
 
@@ -169,13 +197,13 @@ def updateVideoFeed():
 
 aimControlUpdate()
 UIupdate()
-updateVideoFeed()
+if decision == "r": updateVideoFeed()
 cv2.namedWindow("manualcontroltrackpad")
 cv2.setMouseCallback('manualcontroltrackpad', onClick)
 
 print("UI initialized!")
 while True:
-    updateVideoFeed() 
+    if decision == "r": updateVideoFeed() 
     fullwindow[0:300,0:300] = aimcontrol
     cv2.imshow("manualcontroltrackpad", fullwindow)
     cv2.waitKey(1)
