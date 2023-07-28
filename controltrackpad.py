@@ -26,19 +26,19 @@ buttons = [
     ["Rev", (0,150,255), lambda: print("Rev command sent.."), (540,50)],
     ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
     
-    ["Forget Tgt", (255,255,0), lambda: print("Forget target command sent.."), (540,120)],
-    ["LPO Toggle", (255,255,255), lambda: print("LPOT target command sent.."), (720,120)],
+    ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
+    ["LPO Toggle", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
 
-    ["0", (0,255,255), lambda: print("0 select command sent.."), (540,190)],
-    ["1", (0,255,255), lambda: print("1 select command sent.."), (540+(35 * 1),190)],
-    ["2", (0,255,255), lambda: print("2 select command sent.."), (540+(35 * 2),190)],
-    ["3", (0,255,255), lambda: print("3 select command sent.."), (540+(35 * 3),190)],
-    ["4", (0,255,255), lambda: print("4 select command sent.."), (540+(35 * 4),190)],
-    ["5", (0,255,255), lambda: print("5 select command sent.."), (540+(35 * 5),190)],
-    ["6", (0,255,255), lambda: print("6 select command sent.."), (540+(35 * 6),190)],
-    ["7", (0,255,255), lambda: print("7 select command sent.."), (540+(35 * 7),190)],
-    ["8", (0,255,255), lambda: print("8 select command sent.."), (540+(35 * 8),190)],
-    ["9", (0,255,255), lambda: print("9 select command sent.."), (540+(35 * 9),190)],
+    ["0", (0,255,255), lambda: issueCommandTCP("select 0"), (540,190)],
+    ["1", (0,255,255), lambda: issueCommandTCP("select 1"), (540+(35 * 1),190)],
+    ["2", (0,255,255), lambda: issueCommandTCP("select 2"), (540+(35 * 2),190)],
+    ["3", (0,255,255), lambda: issueCommandTCP("select 3"), (540+(35 * 3),190)],
+    ["4", (0,255,255), lambda: issueCommandTCP("select 4"), (540+(35 * 4),190)],
+    ["5", (0,255,255), lambda: issueCommandTCP("select 5"), (540+(35 * 5),190)],
+    ["6", (0,255,255), lambda: issueCommandTCP("select 6"), (540+(35 * 6),190)],
+    ["7", (0,255,255), lambda: issueCommandTCP("select 7"), (540+(35 * 7),190)],
+    ["8", (0,255,255), lambda: issueCommandTCP("select 8"), (540+(35 * 8),190)],
+    ["9", (0,255,255), lambda: issueCommandTCP("select 9"), (540+(35 * 9),190)],
 
     
 ]
@@ -126,6 +126,12 @@ def onClick(event, x, y, f, p, override = False):
         print(f"Pitch/yaw command sent: {pitch}deg pitch, {yaw}deg yaw")
 
 
+def issueCommandTCP(cmd):
+    try:
+        remote.sendTo("TCP", remote.TCP_CONNECTION, f"{cmd};", remote.TCP_REMOTE_PEER)
+        print(f"OK! Sent command {cmd}")
+    except Exception as e:
+        print(f"TCP CmdSend Error: {e}")
 def updateVideoFeed():
     global fullwindow
     r = remote.readFrom("UDP", remote.UDP_SOCKET, 65534)
