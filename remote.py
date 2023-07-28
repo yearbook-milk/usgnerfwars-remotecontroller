@@ -10,15 +10,18 @@ UDP_SOCKET = None
 TCP_REMOTE_PEER = None
 
 def sendTo(protocol, sock, message, destiny = None):
-     try:
+    global udp_port
+    print(destiny)
+    message = bytes(message, "ascii")
+    try:
         if protocol == "TCP":
             sock.sendall(message)
         else:
             assert destiny != None
-            sock.sendto(message, (destiny, data_channel_port))
+            sock.sendto(message, (destiny, udp_port))
         return None
     except (ConnectionResetError, OSError, BrokenPipeError) as e:
-        print(f"[net] Cx Error {e}! Attempting a reconnect...")
+        print(f"[net] Cx Error {e}! Recx logic disabled.")
         #initConnection()
 
 def readFrom(protocol, sock, bufSize = 1024):
@@ -37,13 +40,15 @@ def readFrom(protocol, sock, bufSize = 1024):
             except Exception:
                 return None
     except (ConnectionResetError, OSError, BrokenPipeError):
-        print("Cx Error! Attempting a reconnect...")
-        init_connection(TCP_REMOTE_PEER[0])
+        print("Cx Error! Recx logic disabled.")
+        #init_connection(TCP_REMOTE_PEER[0])
 
 def setupParameters(tcpport = 10007, udpport = 10009):
     global signaling_port, udp_port
     signaling_port = tcpport
-    udp_port = udpport
+    #udp_port = udpport
+    # the UDP port number is determined by the drone and is negotiated over TCP, so it does not make
+    # any sense for the user to be able to set this number when it will be overwritten later
 
 def init_connection(addr):
     time.sleep(5)

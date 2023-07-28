@@ -7,7 +7,10 @@ import pickle
 
 remote.setupParameters()
 try:
-    remote.init_connection(input("IP address of the remote turret? "))
+    ip = input("IP address of the remote turret? ")
+    port = int(input("TCP port number? "))
+    remote.setupParameters(tcpport = port, udpport = 0)
+    remote.init_connection(ip)
 except Exception as e:
     print(f"Failed to establish a connection to the remote: {e}")
 
@@ -44,8 +47,7 @@ text = [
     ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
     ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
     ["<- ManualCtrl", (255,255,255), 0.8, (350,260)],
-    ["cv2-based UI engine demo: github.com/yearbook-milk/usgnerfwars-remotecontroller", (255,255,255), 0.5, (10,620)]   
-
+    ["cv2-based GUI Rendering Engine", (255,255,255), 0.4, (10,690)]
 ]
 
 def UIupdate():
@@ -87,7 +89,7 @@ def aimControlUpdate():
 
 def onClick(event, x, y, f, p, override = False):
     global fullwindow
-    fullwindow = np.zeros((700,1000,3), np.uint8)
+    updateVideoFeed()
 
     
     for i in buttons:
@@ -96,8 +98,12 @@ def onClick(event, x, y, f, p, override = False):
                 color = i[1]
                 i[2]()
             else: color = (50,50,50)
-            cv2.rectangle(fullwindow, (i[3][0]-10,i[3][1]-30), (i[3][0]+int(1 * len(i[0]) * 15),i[3][1]+20), color, -1)
-
+            
+        else:
+            color= (0,0,0)
+            
+        cv2.rectangle(fullwindow, (i[3][0]-10,i[3][1]-30), (i[3][0]+int(1 * len(i[0]) * 15),i[3][1]+20), color, -1)
+    
     UIupdate()
 
 
@@ -110,25 +116,14 @@ def onClick(event, x, y, f, p, override = False):
             aimcontrol = helpers.line(aimcontrol, "Y=", y, (255,0,255))
             pitch = -1 * (int((y/300) * 180) - 90)
             yaw   = +1 * (int((x/300) * 180) - 90)
-            remote.sendTo("TCP", remote.TCP_CONNECTION, f"absyaw {yaw};abspitch {pitch};")
+            # with UDP backwash enabled, we can do this so we can just fire and forget
+            remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
         if event == cv2.EVENT_LBUTTONDOWN:
             unlockControls = not unlockControls
 
         #cv2.putText(aimcontrol, f"client: {pitch}deg pitch, {yaw}deg yaw", (30,270), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255))
         #cv2.putText(aimcontrol, f"controls unlocked: {unlockControls}", (30,290), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255))
         print(f"Pitch/yaw command sent: {pitch}deg pitch, {yaw}deg yaw")
-
-
-    cv2.putText(
-            fullwindow,
-            f"X:{x} Y:{y} evt:{event} flag:{f} param:{p}",
-            (10,690),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (255,255,255)
-        )
-
-    updateVideoFeed()
 
 
 def updateVideoFeed():
@@ -142,12 +137,12 @@ def updateVideoFeed():
 
 aimControlUpdate()
 UIupdate()
+updateVideoFeed()
 cv2.namedWindow("manualcontroltrackpad")
 cv2.setMouseCallback('manualcontroltrackpad', onClick)
 
 print("UI initialized!")
 while True:
-
     updateVideoFeed() 
     fullwindow[0:300,0:300] = aimcontrol
     cv2.imshow("manualcontroltrackpad", fullwindow)
