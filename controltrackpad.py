@@ -9,7 +9,7 @@ ip = None
 port = None
 remote.setupParameters()
 
-decision = input("Start in [r]emote mode or [l]ocal control/test mode? ")
+decision = input("Startup mode? [r] for REMOTE, [l] for LOCAL OPERATION, [g] for GUI TEST % ")
 
 if decision == "r":
     if ip == None or port == None:   
@@ -23,6 +23,8 @@ if decision == "r":
 elif decision == 'l':
     import servo_relay_interface as sri
     pass
+elif decision == 'g':
+    pass
 else:
     exit()
 
@@ -35,7 +37,7 @@ pitch = 0
 yaw = 0
 
 
-if decision == "r":
+if decision == "r" or decision == "g":
     buttons = [
         ["Rev", (0,150,255), lambda: print("Rev command sent.."), (540,50)],
         ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
@@ -68,19 +70,22 @@ else:
         ["Quit", (0,0,255), lambda: exit(), (800,570)],
     ]
 
-if decision == "r":
+if decision == "r": tx = "cv2-based GUI Rendering Engine"
+elif decision == "g": tx = "cv2-based GUI Rendering Engine [GUI TEST ONLY]"
+
+if decision == "r" or decision == "g":
     text = [
         ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
         ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
         ["<- ManualCtrl     Networking ->", (255,255,255), 0.8, (350,260)],
-        ["cv2-based GUI Rendering Engine", (255,255,255), 0.4, (10,690)]
+        [tx, (255,255,255), 0.4, (10,690)]
     ]
 else:
     text = [
         ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
         ["AutoCtrl [is disabled]", (255,255,255), 0.8, (350,120)],
         ["<- ManualCtrl     Networking [is disabled]", (255,255,255), 0.8, (350,260)],
-        ["cv2-based GUI Rendering Engine  :  LOCAL CONTROL ONLY", (255,255,255), 0.4, (10,690)]
+        ["cv2-based GUI Rendering Engine [LOCAL CONTROL ONLY]", (255,255,255), 0.4, (10,690)]
     ]
 
 def UIupdate():
@@ -151,7 +156,7 @@ def onClick(event, x, y, f, p, override = False):
             yaw   = +1 * (int((x/300) * 180) - 90)
             # with UDP backwash enabled, we can do this so we can just fire and forget
             if decision == "r": remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
-            else:
+            elif decision == 'l':
                 sri.pitch(pitch)
                 sri.yaw(yaw)
                 pass
