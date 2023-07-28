@@ -27,7 +27,12 @@ buttons = [
     ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
     
     ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
-    ["LPO Toggle", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
+    ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
+    ["Reinit Pipeln", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (790,120)],
+    
+    ["Graceful D/C", (0,0,255), lambda: issueCommandTCP("stop"), (800,270)],
+    ["Restart", (0,255,255), lambda: issueCommandTCP("restart"), (800,330)],
+
 
     ["0", (0,255,255), lambda: issueCommandTCP("select 0"), (540,190)],
     ["1", (0,255,255), lambda: issueCommandTCP("select 1"), (540+(35 * 1),190)],
@@ -46,7 +51,7 @@ buttons = [
 text = [
     ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
     ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
-    ["<- ManualCtrl", (255,255,255), 0.8, (350,260)],
+    ["<- ManualCtrl     Networking ->", (255,255,255), 0.8, (350,260)],
     ["cv2-based GUI Rendering Engine", (255,255,255), 0.4, (10,690)]
 ]
 
@@ -132,6 +137,12 @@ def issueCommandTCP(cmd):
         print(f"OK! Sent command {cmd}")
     except Exception as e:
         print(f"TCP CmdSend Error: {e}")
+        
+    if cmd == 'stop':
+        remote.TCP_SOCKET.close()
+        remote.UDP_SOCKET.close()
+        exit()
+
 def updateVideoFeed():
     global fullwindow
     r = remote.readFrom("UDP", remote.UDP_SOCKET, 65534)
