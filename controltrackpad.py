@@ -3,16 +3,20 @@ import helpers
 import numpy as np
 import remote
 import pickle
+import os
 
+ip = None
+port = None
 
 remote.setupParameters()
-try:
-    ip = input("IP address of the remote turret? ")
-    port = int(input("TCP port number? "))
-    remote.setupParameters(tcpport = port, udpport = 0)
-    remote.init_connection(ip)
-except Exception as e:
-    print(f"Failed to establish a connection to the remote: {e}")
+if ip == None or port == None:   
+    try:
+        ip = input("IP address of the remote turret? ")
+        port = int(input("TCP port number? "))
+        remote.setupParameters(tcpport = port, udpport = 0)
+        remote.init_connection(ip)
+    except Exception as e:
+        print(f"Failed to establish a connection to the remote: {e}")
 
 
 
@@ -138,10 +142,11 @@ def issueCommandTCP(cmd):
     except Exception as e:
         print(f"TCP CmdSend Error: {e}")
         
-    if cmd == 'stop':
+    if cmd == 'stop' or cmd == "restart":
         remote.TCP_SOCKET.close()
         remote.UDP_SOCKET.close()
         exit()
+
 
 def updateVideoFeed():
     global fullwindow
