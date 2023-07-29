@@ -24,26 +24,29 @@ if decision == "r":
 elif decision == 'l':
     import servo_relay_interface as sri
     pass
+elif decision == "g":
+    pass
 else:
     exit()
 
 
 
 aimcontrol = np.zeros((300,300,3), np.uint8)
-fullwindow = np.zeros((800,1000,3), np.uint8)
+fullwindow = np.zeros((900,1000,3), np.uint8)
 unlockControls = True
 pitch = 0
 yaw = 0
 
 
-if decision == "r":
+if decision == "r" or decision == "g":
     buttons = [
         ["Rev", (0,150,255), lambda: print("Rev command sent.."), (540,50)],
         ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
         
         ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
         ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
-        ["Reinit Pipeln", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (790,120)],
+        ["Apply Changes", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (800,420)],
+        ["Config Pipeln", (255,255,0), lambda: issueCommandTCP("updatepipeline"), (800,480)],
         
         ["Graceful D/C", (0,0,255), lambda: issueCommandTCP("stop"), (800,270)],
         ["Restart", (0,255,255), lambda: issueCommandTCP("restart"), (800,330)],
@@ -69,11 +72,12 @@ else:
         ["Quit", (0,0,255), lambda: exit(), (800,570)],
     ]
 
-if decision == "r":
+if decision == "r" or decision == "g":
     text = [
         ["Fire Ctrl ->", (255,255,255), 0.8, (350,50)],
-        ["AutoCtrl ->", (255,255,255), 0.8, (350,120)],
+        ["Auto Aim->", (255,255,255), 0.8, (350,120)],
         ["<- ManualCtrl     Networking ->", (255,255,255), 0.8, (350,260)],
+        ["        CV Pipeln ->", (255,255,255), 0.8, (510,420)],
         ["cv2-based GUI Rendering Engine", (255,255,255), 0.4, (10,690)]
     ]
 else:
@@ -152,6 +156,7 @@ def onClick(event, x, y, f, p, override = False):
             yaw   = +1 * (int((x/300) * 180) - 90)
             # with UDP backwash enabled, we can do this so we can just fire and forget
             if decision == "r": remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
+            elif decision == "g": pass
             else:
                 sri.pitch(pitch)
                 sri.yaw(yaw)
