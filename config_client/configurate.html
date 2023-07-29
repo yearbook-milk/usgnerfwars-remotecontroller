@@ -1,0 +1,63 @@
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+window.URL = urlParams.get("remote")
+
+function populateSlots(slot, file) {
+
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4) {
+		   // Typical action to be performed when the document is ready:
+		   document.getElementById(slot).innerHTML = xhttp.responseText;
+		}
+	};
+	xhttp.open("GET", `http://${window.URL}/read/${file}`, true);
+	xhttp.send();
+
+}
+
+populateSlots("detect_pipeline", "detectorpipeline.txt")
+populateSlots("detect_config", "detectorfilterdata.txt")
+populateSlots("tracker", "tracker.txt")
+populateSlots("doc", "doc.txt")
+
+function postdata(slot, file, info) {
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		   // Typical action to be performed when the document is ready:
+		   alert("OK! Successfully made changes to the "+info+".")
+		}
+	};
+	xhttp.open("POST", `http://${window.URL}/push/${file}`, true);
+	xhttp.setRequestHeader("Content-type", "text/plain")
+	xhttp.send(document.getElementById(slot).value);
+}
+</script>
+
+<h1>Computer vision pipeline settings</h1>
+
+<fieldset>
+<b>NOTICE!</b><br>
+Once you are done reconfiguring, make sure to press the green "Apply Changes" button to actually apply your changes.<hr>
+<b>Available options:</b><br>
+<code id='doc' style='white-space: pre-wrap'>
+waiting for XMLHTTP...
+</code>
+
+</fieldset>
+
+<h3>Detection pipeline</h3>
+<textarea id="detect_pipeline" cols=40 rows=10>Waiting for XMLHTTP...</textarea><br>
+<button onclick='postdata("detect_pipeline", "detectorpipeline.txt", "subject/ROI detection pipeline")'>Update</button><br>
+
+<h3>Detection parameters</h3>
+<textarea id="detect_config" cols=40 rows=10>Waiting for XMLHTTP...</textarea><br>
+<button onclick='postdata("detect_config", "detectorfilterdata.txt", "filters applied during subject/ROI detection")'>Update</button><br>
+
+
+<h3>Tracking pipeline</h3>
+<textarea id="tracker" cols=40 rows=10>Waiting for XMLHTTP...</textarea><br>
+<button onclick='postdata("tracker", "tracker.txt", "subject tracking pipeline")'>Update</button><br>
+
+

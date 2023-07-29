@@ -46,7 +46,7 @@ if decision == "r" or decision == "g":
         ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
         ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
         ["Apply Changes", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (800,420)],
-        ["Config Pipeln", (255,255,0), lambda: issueCommandTCP("updatepipeline"), (800,480)],
+        ["Config Pipeln", (255,255,0), lambda: os.system(f"python -m webbrowser file:///{os.path.abspath('config_client/configurate.html')}?remote={net.TCP_REMOTE_PEER}:{cas_portnumber}"), (800,480)],
         
         ["Graceful D/C", (0,0,255), lambda: issueCommandTCP("stop"), (800,270)],
         ["Restart", (0,255,255), lambda: issueCommandTCP("restart"), (800,330)],
