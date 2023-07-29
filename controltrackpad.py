@@ -49,7 +49,7 @@ def openCfg():
     f.write(c)
     f.close()
     os.system(f"python -m webbrowser file:///{os.path.abspath('config_client/configurate.html')}")
-    time.sleep("0.5")
+    time.sleep(0.5)
     f = open(os.path.abspath('config_client/configurate.html'), "w")
     f.write(c_old)
     f.close()  
