@@ -7,6 +7,7 @@ import os
 
 ip = None
 port = None
+cas_portnumber = 8080
 remote.setupParameters()
 
 decision = input("Start in [r]emote mode or [l]ocal control/test mode? ")
@@ -178,6 +179,20 @@ def issueCommandTCP(cmd):
 
 def updateVideoFeed():
     global fullwindow
+
+    r = remote.readFrom("TCP", remote.TCP_CONNECTION, 2048)
+    if r:
+        try:
+            r = str(r, "ascii")
+            rs = r.split(" ")
+            if (rs[0] == "casconfig"):
+                global cas_portnumber
+                cas_portnumber = int(rs[1])
+                print("Set the CAS cfg service port number to port#"+str(rs[1]))
+
+        except Exception as e:
+            print(f"Decode error! On reading a TCP packet, error on decode: {e}")
+    
     r = remote.readFrom("UDP", remote.UDP_SOCKET, 65534)
     if r:
         try:
