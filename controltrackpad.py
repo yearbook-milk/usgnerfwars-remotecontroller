@@ -5,6 +5,7 @@ import remote
 import pickle
 import os
 import time
+import config
 
 ip = None
 port = None
@@ -24,6 +25,8 @@ if decision == "r":
             print(f"Failed to establish a connection to the remote: {e}")
 elif decision == 'l':
     import servo_relay_interface as sri
+    sri.config = config.pin_config
+    sri.__initialize()
     pass
 elif decision == "g":
     pass
@@ -85,7 +88,7 @@ else:
     buttons = [
         ["Rev", (0,150,255), lambda: print("Local Rev command sent.."), (540,50)],
         ["Fire", (0,0,255), lambda: print("Local Fire command sent.."), (620,50)],
-        ["Quit", (0,0,255), lambda: exit(), (800,570)],
+        ["Quit", (0,0,255), lambda: shutdownLmode(), (800,570)],
     ]
 
 if decision == "r" or decision == "g":
@@ -197,7 +200,9 @@ def issueCommandTCP(cmd):
         remote.UDP_SOCKET.close()
         exit()
 
-
+def shutdownLmode():
+    sri.__shutdown()
+    exit()
 
 def updateVideoFeed():
     global fullwindow

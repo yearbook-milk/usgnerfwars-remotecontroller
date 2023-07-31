@@ -30,6 +30,7 @@ def centerAllAxes():
 
 
 def pitch(angle):
+    global pwmL, pwmR, config, pwmP
     assert (-90 <= angle <= 90)
     angle += 90
     pwmL.start(angle_to_percent(180-angle))
@@ -37,6 +38,7 @@ def pitch(angle):
     time.sleep(config["afterSpdCmdDelay"])
     
 def yaw(angle):
+    global pwmL, pwmR, config, pwmP
     assert (-90 <= angle <= 90)
     angle += 90
     pwmP.start(angle_to_percent(angle))
@@ -59,6 +61,7 @@ def __initialize():
 
 
 def __shutdown():
+    global pwmL, pwmR, config, pwmP
     #Close GPIO & cleanup
     pwmL.stop()
     pwmR.stop()
