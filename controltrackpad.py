@@ -59,8 +59,8 @@ def openCfg():
 
 if decision == "r" or decision == "g":
     buttons = [
-        ["Rev", (0,150,255), lambda: print("Rev command sent.."), (540,50)],
-        ["Fire", (0,0,255), lambda: print("Fire command sent.."), (620,50)],
+        ["Rev", (0,150,255), lambda: issueCommandTCP("dtoggle rev"), (540,50)],
+        ["Fire", (0,0,255), lambda: issueCommandTCP("dtoggle fire"), (620,50)],
         
         ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
         ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
