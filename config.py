@@ -5,6 +5,10 @@ pin_config = {                                      # These control which pins o
 "leftPin": 18,
 "rightPin": 13,
 "yawPin": 12,
+
+"revPin": 23,
+"firePin": 24,
+
 "afterSpdCmdDelay": 0,                              # This should be set to 0, in order to make the pitch and yaw cmds nonblocking.
 "pulse_freq": 50,                                    # Pulse frequency, in hZ. 
 "pinsToSet": "leftPin rightPin yawPin"

@@ -86,8 +86,8 @@ if decision == "r" or decision == "g":
     ]
 else:
     buttons = [
-        ["Rev", (0,150,255), lambda: print("Local Rev command sent.."), (540,50)],
-        ["Fire", (0,0,255), lambda: print("Local Fire command sent.."), (620,50)],
+        ["Rev", (0,150,255), lambda: sri.toggleRev(), (540,50)],
+        ["Fire", (0,0,255), lambda: sri.toggleFire(), (620,50)],
         ["Quit", (0,0,255), lambda: shutdownLmode(), (800,570)],
     ]
 
