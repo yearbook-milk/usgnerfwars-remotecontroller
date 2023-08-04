@@ -171,8 +171,8 @@ def onClick(event, x, y, f, p, override = False):
             aimControlUpdate()
             aimcontrol = helpers.line(aimcontrol, "X=", x, (255,0,255))
             aimcontrol = helpers.line(aimcontrol, "Y=", y, (255,0,255))
-            pitch = -1 * (int((y/300) * 180) - 90)
-            yaw   = +1 * (int((x/300) * 180) - 90)
+            pitch = +1 * (float((y/300) * 180) - 90)
+            yaw   = +1 * (float((x/300) * 180) - 90)
             # with UDP backwash enabled, we can do this so we can just fire and forget
             if decision == "r": remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
             elif decision == "g": pass
