@@ -12,13 +12,13 @@ port = None
 cas_portnumber = 8080
 remote.setupParameters()
 
-decision = input("Start in [r]emote mode or [l]ocal control/test mode? ")
+decision = input("Start in [r]emote mode, [l]ocal control mode, or [g]UI test mode? ")
 
 if decision == "r":
     if ip == None or port == None:   
         try:
-            ip = input("IP address of the remote turret? ")
-            port = int(input("TCP port number? "))
+            ip = input("IP address of the remote? ")
+            port = int(input("Port number of the remote (enter an int)? "))
             remote.setupParameters(tcpport = port, udpport = 0)
             remote.init_connection(ip)
         except Exception as e:
@@ -60,10 +60,11 @@ def openCfg():
 if decision == "r" or decision == "g":
     buttons = [
         ["Rev", (0,150,255), lambda: issueCommandTCP("dtoggle rev"), (540,50)],
-        ["Fire", (0,0,255), lambda: issueCommandTCP("dtoggle fire"), (620,50)],
+        ["Fire Auto", (0,0,255), lambda: issueCommandTCP("dtoggle fire"), (620,50)],
+        ["Fire Semi", (0,0,255), lambda: issueCommandTCP("dtoggle fireonce"), (780,50)],
         
         ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
-        ["LPO", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
+        ["LargestPolygonOnly", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
         ["Apply Changes", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (800,420)],
         ["Config Pipeln", (255,255,0), openCfg, (800,480)],
         
