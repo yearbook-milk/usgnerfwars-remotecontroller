@@ -17,8 +17,8 @@ decision = input("Start in [r]emote mode, [l]ocal control mode, or [g]UI test mo
 if decision == "r":
     if ip == None or port == None:   
         try:
-            ip = input("IP address of the remote? ")
-            port = int(input("Port number of the remote (enter an int)? "))
+            ip = "192.168.137.147"
+            port = 10007
             remote.setupParameters(tcpport = port, udpport = 0)
             remote.init_connection(ip)
         except Exception as e:

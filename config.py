@@ -11,7 +11,10 @@ pin_config = {                                      # These control which pins o
 
 "afterSpdCmdDelay": 0,                              # This should be set to 0, in order to make the pitch and yaw cmds nonblocking.
 "pulse_freq": 50,                                    # Pulse frequency, in hZ. 
-"pinsToSet": "leftPin rightPin yawPin"
+"pinsToSet": "leftPin rightPin yawPin",
+
+"yaw_limits": (-90, 90),
+"pitch_limits": (-35, 90),
 
 }
 
