@@ -14,7 +14,7 @@ pin_config = {                                      # These control which pins o
 "pinsToSet": "leftPin rightPin yawPin",
 
 "yaw_limits": (-90, 90),
-"pitch_limits": (-35, 90),
+"pitch_limits": (-30, 30),
 
 }
 

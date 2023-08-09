@@ -14,7 +14,7 @@ config = {
 
 "afterSpdCmdDelay": 0,
 "pulse_freq": 50,
-"pinsToSet": "leftPin rightPin yawPin"    
+"pinsToSet": "leftPin rightPin yawPin"    ,
 
 "yaw_limits": (-90, 90),
 "pitch_limits": (-35, 90),
