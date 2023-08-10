@@ -18,7 +18,7 @@ if decision == "r":
     if ip == None or port == None:   
         try:
             ip = "192.168.137.147"
-            port = 10007
+            port = 10008
             remote.setupParameters(tcpport = port, udpport = 0)
             remote.init_connection(ip)
         except Exception as e:
@@ -61,15 +61,13 @@ if decision == "r" or decision == "g":
     buttons = [
         ["Rev", (0,150,255), lambda: issueCommandTCP("dtoggle rev"), (540,50)],
         ["Fire Auto", (0,0,255), lambda: issueCommandTCP("dtoggle fire"), (620,50)],
-        ["Fire Semi", (0,0,255), lambda: issueCommandTCP("dtoggle fireonce"), (780,50)],
         
-        ["Forget Tgt", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
+        ["Stop Track", (255,255,0), lambda: issueCommandTCP("forget"), (540,120)],
         ["LargestPolygonOnly", (255,255,255), lambda: issueCommandTCP("toggle_lpo"), (720,120)],
         ["Apply Changes", (0,255,0), lambda: issueCommandTCP("updatepipeline"), (800,420)],
         ["Config Pipeln", (255,255,0), openCfg, (800,480)],
         
         ["Graceful D/C", (0,0,255), lambda: issueCommandTCP("stop"), (800,270)],
-        ["Restart", (0,255,255), lambda: issueCommandTCP("restart"), (800,330)],
 
 
         ["0", (0,255,255), lambda: issueCommandTCP("select 0"), (540,190)],
@@ -249,5 +247,10 @@ while True:
     if decision == "r": updateVideoFeed() 
     fullwindow[0:300,0:300] = aimcontrol
     cv2.imshow("manualcontroltrackpad", fullwindow)
-    cv2.waitKey(1)
+    kb = cv2.waitKey(1)
 
+    for i in buttons:
+        if kb > 1:
+            if kb == ord(i[0][0].lower()):
+                print(f"Function key selected using the keyboard: {kb}->{i[0].lower()}")
+                i[2]()    
