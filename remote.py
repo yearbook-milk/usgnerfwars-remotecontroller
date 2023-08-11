@@ -46,12 +46,11 @@ def readFrom(protocol, sock, bufSize = 1024):
 def setupParameters(tcpport = 10007, udpport = 10009):
     global signaling_port, udp_port
     signaling_port = tcpport
-    #udp_port = udpport
-    # the UDP port number is determined by the drone and is negotiated over TCP, so it does not make
-    # any sense for the user to be able to set this number when it will be overwritten later
+    
 
 def init_connection(addr):
     global TCP_SOCKET, UDP_SOCKET, udp_port, signaling_port, TCP_REMOTE_PEER
+    # close current connections if they exist
     print("Waiting to connect again...")
     if TCP_SOCKET:
         TCP_SOCKET.close()
@@ -61,6 +60,7 @@ def init_connection(addr):
         UDP_SOCKET = None
         print("Closed UDP socket.")
         
+    # connect
     TCP_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #TCP_SOCKET.setblocking(0)
     TCP_REMOTE_PEER = addr
@@ -68,9 +68,10 @@ def init_connection(addr):
     global TCP_CONNECTION
     TCP_CONNECTION = TCP_SOCKET
     TCP_SOCKET.setblocking(0)
-    # on the other program, conn is the connected state of socket, but in this case both names refer to the same socket that we want to send to
 
-    # now we have to wait for the UDP port number the remote wants
+    # the first TCP packet that is sent back should be a UDP port number, which is the port number
+    # that the remote wants to exchange data over
+    # we loop until we get a valid response, sometimes the remote will send random junk which isn't a UDP port number
     while True:
         try:
             udp_port = int(str(TCP_SOCKET.recv(1024), "ascii"))
@@ -79,6 +80,7 @@ def init_connection(addr):
         except Exception as e:
             print(f"Remote peer send an invalid negotiated UDP port number back [{udp_port}: {e}], unable to establish receiver for UDP packets.")
 
+    # with the UDP port number negotiated, store that port number and start allowing for comms to flow over the UDP channel
     UDP_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     UDP_SOCKET.setblocking(0)
     #UDP_SOCKET.settimeout(1.0)   

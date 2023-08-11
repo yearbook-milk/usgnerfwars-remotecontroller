@@ -18,6 +18,9 @@ config = {
 
 "yaw_limits": (0, 0),
 "pitch_limits": (0, 0),
+
+"min_pulse_length": 500,
+"max_pulse_length": 2500,
 }
 
 rev = False

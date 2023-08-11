@@ -14,22 +14,30 @@ remote.setupParameters()
 
 decision = input("Start in [r]emote mode, [l]ocal control mode, or [g]UI test mode? ")
 
+# if on remote mode, open a connection to the remote before going on
 if decision == "r":
     if ip == None or port == None:   
         try:
-            ip = "192.168.137.147"
-            port = 10008
+            ip = input("IP address of the remote? ")
+            port = int(input("TCP port number of the remote (enter an int)? "))
             remote.setupParameters(tcpport = port, udpport = 0)
             remote.init_connection(ip)
         except Exception as e:
             print(f"Failed to establish a connection to the remote: {e}")
+            
+# if on local mode, start the hardware software interface so the local client can control servos 
+# you ONLY turn on local mode when you are running this on the pi
 elif decision == 'l':
     import servo_relay_interface as sri
     sri.config = config.pin_config
     sri.__initialize()
     pass
+    
+# if on GUI test mode, act as if networking is enabled but don't actually connect anywhere
 elif decision == "g":
     pass
+    
+# if the user didn't pick r, l or g, exit
 else:
     exit()
 
@@ -41,7 +49,7 @@ unlockControls = True
 pitch = 0
 yaw = 0
 
-
+# helper method for opening the config client (which allows us to change detection and tracking parameters live)
 def openCfg():
     f = open(os.path.abspath('config_client/configurate.html'), "r")
     c = f.read()
@@ -57,6 +65,7 @@ def openCfg():
     f.write(c_old)
     f.close()  
 
+# load GUI elements
 if decision == "r" or decision == "g":
     buttons = [
         ["Rev", (0,150,255), lambda: issueCommandTCP("dtoggle rev"), (540,50)],
@@ -106,6 +115,7 @@ else:
         ["cv2-based GUI Rendering Engine  :  LOCAL CONTROL ONLY", (255,255,255), 0.4, (10,690)]
     ]
 
+# renders all GUI elements again
 def UIupdate():
     global fullwindow
     for i in buttons:
@@ -128,6 +138,7 @@ def UIupdate():
             i[1]
         )
 
+# redraws the aim control module in the top left
 def aimControlUpdate():
     global aimcontrol
     aimcontrol = np.zeros((300,300,3), np.uint8)
@@ -142,14 +153,15 @@ def aimControlUpdate():
     aimcontrol = helpers.line(aimcontrol, "Y=", 150, (255,255,255))
     
     
-
+# on mouse event, such as mouse move or mouse click
 def onClick(event, x, y, f, p, override = False):
     global fullwindow
     updateVideoFeed()
 
-    
+    # if the mouse is over any buttons, highlight them
     for i in buttons:
         if (i[3][0]-10 <= x <= i[3][0]+int(1 * len(i[0]) * 15)) and (i[3][1]-30 <= y <= i[3][1]+20):
+            # if there was also a click event reported, act on the button
             if (event == cv2.EVENT_LBUTTONDOWN):
                 color = i[1]
                 i[2]()
@@ -160,25 +172,32 @@ def onClick(event, x, y, f, p, override = False):
             
         cv2.rectangle(fullwindow, (i[3][0]-10,i[3][1]-30), (i[3][0]+int(1 * len(i[0]) * 15),i[3][1]+20), color, -1)
     
+    # update the GUI elements (doesn't include buttons, those are handled somewhere else i would think)
     UIupdate()
 
 
-    
+    # if the mouse event was over the manual control module
     if ( 0 <= x <= 300 and 0 <= y <= 300):
         global unlockControls, aimcontrol, pitch, yaw
         if unlockControls or override:
+            # update the UI (this controls the little purple crosshair)
             aimControlUpdate()
             aimcontrol = helpers.line(aimcontrol, "X=", x, (255,0,255))
             aimcontrol = helpers.line(aimcontrol, "Y=", y, (255,0,255))
+            
+            # translate the position on screen into a pitch yaw command
             pitch = +1 * (float((y/300) * 180) - 90)
             yaw   = +1 * (float((x/300) * 180) - 90)
-            # with UDP backwash enabled, we can do this so we can just fire and forget
+            
+            # send the pitch/yaw command over network, if networking is enabled
             if decision == "r": remote.sendTo("UDP", remote.UDP_SOCKET, f"absyaw {yaw};abspitch {pitch};", remote.TCP_REMOTE_PEER)
             elif decision == "g": pass
             else:
                 sri.pitch(pitch)
                 sri.yaw(yaw)
                 pass
+        
+        # if the manual control trackpad is clicked, lock or unlock the controls
         if event == cv2.EVENT_LBUTTONDOWN:
             unlockControls = not unlockControls
 
@@ -187,6 +206,7 @@ def onClick(event, x, y, f, p, override = False):
         print(f"Pitch/yaw command sent: {pitch}deg pitch, {yaw}deg yaw")
 
 
+# heleper method to send a command over TCP
 def issueCommandTCP(cmd):
     try:
         remote.sendTo("TCP", remote.TCP_CONNECTION, f"{cmd};", remote.TCP_REMOTE_PEER)
@@ -199,18 +219,23 @@ def issueCommandTCP(cmd):
         remote.UDP_SOCKET.close()
         exit()
 
+# shutdown in L mode
 def shutdownLmode():
     sri.__shutdown()
     exit()
 
+# updates the video feed and other information by reading from socket
 def updateVideoFeed():
     global fullwindow
 
+    # listen for any commands over the TCP channel
     r = remote.readFrom("TCP", remote.TCP_CONNECTION, 2048)
     if r:
         try:
             r = str(r, "ascii")
             rs = r.split(" ")
+            # the first TCP packet the remote should send after connecting is the port number 
+            # of the Java config update HTTP server
             if (rs[0] == "casconfig"):
                 global cas_portnumber
                 cas_portnumber = int(rs[1])
@@ -219,23 +244,35 @@ def updateVideoFeed():
         except Exception as e:
             print(f"Decode error! On reading a TCP packet, error on decode: {e}")
     
+    # listen for video data over UDP 
     r = remote.readFrom("UDP", remote.UDP_SOCKET, 65534)
     if r:
         try:
+            # there are multiple parts of the UDP packet
             parts = r.split(b"::::")
+            
+            # unpickle the first part, which is the video data stored as a pickled np array
             frame = pickle.loads(parts[0])
+            
+            # unpickle the dimenion data, which a tuple containing dimensino data
+            # its the same format as image_array_numpy.shape
             parts[2] = pickle.loads(parts[2])
             frame = cv2.resize(frame, (parts[2][1], parts[2][0]))
             
+            # unpickle the array of text, which is an array of arrays containing information about where to put text and 
+            # how to draw it
+            # each text element is an array stored as [int x, int y, tuple color, float textsize, string content]
             encoded_txt = pickle.loads(parts[1])
             for i in encoded_txt:
                 frame = cv2.putText(frame, i[4], (i[0], i[1]), cv2.FONT_HERSHEY_SIMPLEX, i[3], i[2])
 
+            # after unpacking text data, draw the video on the GUI
             fullwindow[320:320+frame.shape[0],0:0+frame.shape[1]] = frame
         except Exception as e:
             print(f"Decode error! An error occurred when trying to decode the video data received: {e}")
 
 
+# update everything first and start up a window
 aimControlUpdate()
 UIupdate()
 if decision == "r": updateVideoFeed()
@@ -243,12 +280,16 @@ cv2.namedWindow("manualcontroltrackpad")
 cv2.setMouseCallback('manualcontroltrackpad', onClick)
 
 print("UI initialized!")
+
 while True:
+    # always update the video feed, update the other stuff only on mouse event
     if decision == "r": updateVideoFeed() 
     fullwindow[0:300,0:300] = aimcontrol
     cv2.imshow("manualcontroltrackpad", fullwindow)
     kb = cv2.waitKey(1)
 
+    # press a button when a key is pressed
+    # (for instance, pressing 'g' will press the button that starts with "G" or "g", which in this case is "Graceful D/C"
     for i in buttons:
         if kb > 1:
             if kb == ord(i[0][0].lower()):
